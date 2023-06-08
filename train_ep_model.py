@@ -96,8 +96,8 @@ len(df)
 
 train_cols = ['Time', 'Offensive_rebound', 'Defensive_rebound', 'Steal', 'Block',
               'OffPPM', 'DefPPM', 'OffAPM', 'OffRPM', 'DefAPM', 'DefRPM',
-              'OffRaptorOff', 'OffRaptorDef', 'OffRaptorTot', 'OffRaptorWar',
-              'DefRaptorOff', 'DefRaptorDef', 'DefRaptorTot', 'DefRaptorWar'
+              'OffRaptorOff', 'OffRaptorDef', 'OffRaptorWar',
+              'DefRaptorOff', 'DefRaptorDef', 'DefRaptorWar'
               ]
 target_cols = ['Points']
 
