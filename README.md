@@ -7,7 +7,7 @@ To begin, download NBA play-by-play data from [Kaggle](https://www.kaggle.com/da
 
 By default, dates in the file are set to select games from the 2018-19 NBA regular season.
 
-Next, use `get_pbp_data.ipynb` to get play-by-play data from the prior season.
+Next, use `get_player_stats.ipynb` to get player stats from the season. Use `compute_rolling_stats.ipynb` to get each players points/assists/rebounds per minute up to each date they played.
 
 Download RAPTOR data from [FiveThirtyEight](https://projects.fivethirtyeight.com/nba-player-ratings) and use `raptor_name2id.ipynb` to add a BasketballReference name ID column to the RAPTOR data.
 
