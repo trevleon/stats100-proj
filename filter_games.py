@@ -13,7 +13,7 @@ def filter_games(in_file, out_file, start_date, end_date):
                 writer.writerow(row)
 
 
-# Data downloaded from https://www.kaggle.com/datasets/xocelyk/nba-pbp
+# all_games.csv downloaded from https://www.kaggle.com/datasets/xocelyk/nba-pbp
 filter_games(in_file="all_games.csv",
              out_file="pbp_18-19.csv",
              start_date=datetime(2018, 10, 16),
