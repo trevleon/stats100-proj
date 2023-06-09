@@ -2,10 +2,7 @@ import numpy as np
 import pandas as pd
 import pickle
 
-subsample = 0.1
-lr = 5e-7
-epochs = 10000
-batch_size = 10000
+load_ckpt = True
 np.random.seed(0)
 
 
@@ -24,10 +21,12 @@ def predict(X, w, b):
     return np.dot(X, w) + b
 
 
-def sgd(X_train, y_train, X_val, y_val, lr, epochs, batch_size):
+def sgd(X_train, y_train, X_val, y_val, lr, epochs, batch_size, w, b):
     # Initialize weights
-    w = np.random.normal(0, 0.1, size=X_train.shape[1])
-    b = 0
+    if w is None:
+        w = np.random.normal(0, 0.1, size=X_train.shape[1])
+    if b is None:
+        b = 1
 
     # Early stopping
     best_loss = 1e9
@@ -90,20 +89,37 @@ df.head()
 df[["Steal"]] = df.groupby(["GameID"]).shift(1)[["Steal"]]
 df.dropna(inplace=True)
 
+if load_ckpt:
+    with open('ep_model_results_10k.pkl', 'rb') as f:
+        ckpt_results = pickle.load(f)
+
+        subsample = ckpt_results['subsample']
+        lr = ckpt_results['lr']
+        epochs = ckpt_results['epochs']
+        batch_size = ckpt_results['batch_size']
+        train_cols = ckpt_results['train_cols']
+        target_cols = ckpt_results['target_cols']
+        w = ckpt_results['w']
+        b = ckpt_results['b']
+else:
+    subsample = 0.5
+    lr = 5e-7
+    epochs = 10000
+    batch_size = 10000
+    train_cols = ['Time', 'Offensive_rebound', 'Defensive_rebound', 'Steal', 'Block',
+                'OffPPM', 'DefPPM', 'OffAPM', 'OffRPM', 'DefAPM', 'DefRPM',
+                'OffRaptorOff', 'OffRaptorDef', # 'OffRaptorWar',
+                'DefRaptorOff', 'DefRaptorDef', # 'DefRaptorWar'
+                ]
+    target_cols = ['Points']
+    w = None
+    b = None
+
 # Subsample the data
 df = df[:int(subsample * len(df))]
 
 df_train = df[:int(len(df) * 0.8)]
 df_test = df[int(len(df) * 0.8):]
-
-train_cols = ['Time', 'Offensive_rebound', 'Defensive_rebound', 'Steal', 'Block',
-              'OffPPM', 'DefPPM', 'OffAPM', 'OffRPM', 'DefAPM', 'DefRPM',
-              'OffRaptorOff', 'OffRaptorDef', # 'OffRaptorWar',
-              'DefRaptorOff', 'DefRaptorDef', # 'DefRaptorWar'
-            #   'OffPPM', 'DefPPM',
-            #   'OffRaptorOff', 'DefRaptorDef'
-              ]
-target_cols = ['Points']
 
 X_train = df_train[train_cols].to_numpy()
 y_train = df_train[target_cols].to_numpy().squeeze(-1)
@@ -111,7 +127,7 @@ X_test = df_test[train_cols].to_numpy()
 y_test = df_test[target_cols].to_numpy().squeeze(-1)
 
 w, b = sgd(X_train, y_train, X_test, y_test,
-           lr=lr, epochs=epochs, batch_size=batch_size)
+           lr=lr, epochs=epochs, batch_size=batch_size, w=w, b=b)
 
 train_preds = predict(X_train, w, b)
 test_preds = predict(X_test, w, b)
