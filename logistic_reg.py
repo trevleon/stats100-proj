@@ -19,6 +19,7 @@ def binary_cross_entropy(y_true, y_pred, w):
 def binary_cross_entropy_reg(y_true, y_pred, w, alpha=0.01):
     return -np.mean(y_true * np.log(y_pred) + (1 - y_true) * np.log(1 - y_pred)) + alpha * np.dot(w, w)
 
+
 def sgd(X_train, y_train, lr=0.001, epochs=1000, batch_size=10000, reg=None):
     # Initialize weights
     w = np.random.normal(0, 1, size=X_train.shape[1])
@@ -69,39 +70,42 @@ def sgd(X_train, y_train, lr=0.001, epochs=1000, batch_size=10000, reg=None):
 
     return w, b
 
+
 def accuracy(y_true, y_pred):
     return np.mean(y_true == y_pred)
 
 
-df = pd.read_csv("possessions_18-19.csv")
-# print(df.head())
-# print(df.describe())
-
-# O reb: this possession
-# D reb: next possession
-# Steal: next possession
-# Block: this possession
+df = pd.read_csv("possessions_with_rolling_stats.csv")
 
 df[["Steal"]] = df.groupby(["GameID"]).shift(1)[["Steal"]]
 df.dropna(inplace=True)
 
 # Drop all-zero rows
-df = df[(df[["Offensive_rebound", "Defensive_rebound", "Steal", "Block"]] != 0).any(axis=1)]
+# df = df[(df[["Offensive_rebound", "Defensive_rebound", "Steal", "Block"]] != 0).any(axis=1)]
+
+train_cols = [
+              'Offensive_rebound', 'Defensive_rebound', 'Steal', 'Block',
+              'OffPPM', 'DefPPM', 'OffAPM', 'OffRPM', 'DefAPM', 'DefRPM',
+              'OffRaptorOff', 'OffRaptorDef', 'OffRaptorWar',
+              'DefRaptorOff', 'DefRaptorDef', 'DefRaptorWar',
+              ]
 
 train_size = int(0.8 * len(df))
 
-X_train = df[["Offensive_rebound", "Defensive_rebound", "Steal", "Block"]].iloc[:train_size].copy().to_numpy()
+X_train = df[train_cols].iloc[:train_size].copy().to_numpy().astype(float)
 y_train = (df["Points"].iloc[:train_size] > 0).copy().to_numpy().astype(int)
-X_test = df[["Offensive_rebound", "Defensive_rebound", "Steal", "Block"]].iloc[train_size:].copy().to_numpy()
+X_test = df[train_cols].iloc[train_size:].copy().to_numpy().astype(float)
 y_test = (df["Points"].iloc[train_size:] > 0).copy().to_numpy().astype(int)
 
 # class_weights = np.array([1 / np.sum(y_train == 0), 1 / np.sum(y_train == 1)])
-class_weights = np.array([1, 1.03])
+class_weights = np.array([1, 1])
 
 w, b = sgd(X_train, y_train, lr=0.1, epochs=10000, batch_size=10000)
 y_pred = 1 / (1 + np.exp(-np.dot(X_test, w) - b))
 print(f"Test loss: {binary_cross_entropy(y_test, y_pred, w)}")
 y_pred = (y_pred > 0.5).astype(int)
 print(f"Test accuracy: {accuracy(y_test, y_pred)}")
+print(f"Test accuracy positive: {accuracy(y_test[y_test == 1], y_pred[y_test == 1])}")
+print(f"Test accuracy negative: {accuracy(y_test[y_test == 0], y_pred[y_test == 0])}")
 
 breakpoint()

@@ -75,25 +75,37 @@ def r_squared(y_true, y_pred):
     return 1 - numerator / denominator
 
 
-df = pd.read_csv("possessions_18-19.csv")
+df = pd.read_csv("possessions_with_rolling_stats.csv")
 
 df[["Steal"]] = df.groupby(["GameID"]).shift(1)[["Steal"]]
 df.dropna(inplace=True)
 
 # Drop all-zero rows
-df = df[(df[["Offensive_rebound", "Defensive_rebound", "Steal", "Block"]] != 0).any(axis=1)]
+# df = df[(df[["Offensive_rebound", "Defensive_rebound", "Steal", "Block"]] != 0).any(axis=1)]
 
 train_size = int(0.8 * len(df))
 
-feats = ["Offensive_rebound", "Defensive_rebound", "Steal", "Block"]
-X_train = df[feats].iloc[: train_size].to_numpy()
-y_train = df["Points"].iloc[: train_size ].to_numpy()
-X_test = df[feats].iloc[ train_size :].to_numpy()
-y_test = df["Points"].iloc[ train_size :].to_numpy()
+train_cols = [
+              'Offensive_rebound', 'Defensive_rebound', 'Steal', 'Block',
+              'OffPPM', 'DefPPM', 'OffAPM', 'OffRPM', 'DefAPM', 'DefRPM',
+              'OffRaptorOff', 'OffRaptorDef', 'OffRaptorWar',
+              'DefRaptorOff', 'DefRaptorDef', 'DefRaptorWar',
+              ]
+
+X_train = df[train_cols].iloc[:train_size].to_numpy().astype(np.float32)
+y_train = df["Points"].iloc[:train_size].to_numpy()
+X_test = df[train_cols].iloc[train_size:].to_numpy().astype(np.float32)
+y_test = df["Points"].iloc[train_size:].to_numpy()
 
 print(X_train.shape, y_train.shape)
 
-w, b = sgd(X_train, y_train, lr=0.1, epochs=1000, batch_size=10000)
+X_train_ones = np.concatenate([X_train, np.ones((X_train.shape[0], 1))], axis=1)
+X_test_ones = np.concatenate([X_test, np.ones((X_test.shape[0], 1))], axis=1)
+
+# w, b = sgd(X_train, y_train, lr=0.1, epochs=1000, batch_size=10000)
+w = np.linalg.solve(np.dot(X_train_ones.T, X_train_ones), np.dot(X_train_ones.T, y_train))
+w, b = w[:-1], w[-1]
+
 y_pred = np.dot(X_test, w) + b
 print(f"Test loss: {mse_loss(y_test, y_pred, w)}")
 print(f"Test R^2: {r_squared(y_test, y_pred)}")
