@@ -1,0 +1,6 @@
+numpy
+pandas
+nba-api
+requests
+bs4
+Unidecode
