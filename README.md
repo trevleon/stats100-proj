@@ -1,0 +1,18 @@
+# stats100-proj
+
+This repository contains source code for a course project from Stanford's Spring 2023 offering of Stats 100: Mathematics of Sports.
+[link to blog post]
+
+To begin, download NBA play-by-play data from [Kaggle](https://www.kaggle.com/datasets/xocelyk/nba-pbp). To select games, run `filter_games.py`.
+
+By default, dates in the file are set to select games from the 2018-19 NBA regular season.
+
+Next, use `get_pbp_data.ipynb` to get play-by-play data from the prior season.
+
+Download RAPTOR data from [FiveThirtyEight](https://projects.fivethirtyeight.com/nba-player-ratings) and use `raptor_name2id.ipynb` to add a BasketballReference name ID column to the RAPTOR data.
+
+Combine these three datasets into one possession-by-possession dataset using `combine_features.ipynb`.
+
+Now you can train models using `linear_reg.py` and `logistic_reg.py`.
+
+To see our analysis, check `plot.ipynb`.
