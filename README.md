@@ -1,7 +1,7 @@
 # stats100-proj
 
 This repository contains source code for a course project from Stanford's Spring 2023 offering of Stats 100: Mathematics of Sports.
-[link to blog post]
+To learn more about the project, read our [blog post](https://stats100blog.wordpress.com/2023/06/09/predicting-nba-possession-outcomes-using-regression).
 
 To begin, download NBA play-by-play data from [Kaggle](https://www.kaggle.com/datasets/xocelyk/nba-pbp). To select games, run `filter_games.py`.
 
